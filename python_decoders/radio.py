@@ -4,7 +4,7 @@ import signal
 import socket
 import struct
 import sys
-import thread
+import threading
 
 import numpy as np
 
@@ -17,7 +17,7 @@ running = True
 
 if __name__ == '__main__':
     if len(sys.argv) != 3 or sys.argv[1] not in ['am', 'fm']:
-        print >>sys.stderr, "Usage: %s am|fm <sample_frequency> <gain>" % sys.argv[0]
+        print("Usage: %s am|fm <sample_frequency> <gain>" % sys.argv[0], file=sys.stderr)
         exit(1)
 
     Fs = int(float(sys.argv[2]))  # Sample rate
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         decoder = FM(Fs)
 
     if decoder.Fs != Fs:
-        print >>sys.stderr, "Wrong sample frequency, expected %d" % decoder.Fs
+        print("Wrong sample frequency, expected %d" % decoder.Fs, file=sys.stderr)
         sys.exit(1)
 
     def read_samples():
@@ -44,7 +44,7 @@ if __name__ == '__main__':
                 data -= (1 + 1j)
                 decoder.feed(data, gain)
             except socket.error as msg:
-                print >> sys.stderr, str(msg)
+                print(str(msg), file=sys.stderr)
                 sys.exit(1)
         sock.close()
 
@@ -52,16 +52,15 @@ if __name__ == '__main__':
     try:
         sock.connect(socket_address)
     except socket.error as msg:
-        print >> sys.stderr, str(msg)
+        print(str(msg), file=sys.stderr)
         sys.exit(1)
 
-    thread.start_new_thread(read_samples, ())
-    thread.start_new_thread(decoder.run, ())
-
+    threading.Thread(target=read_samples)
+    threading.Thread(target=decoder.run)
 
     def signal_handler(sig, frame):
         global decoder, running
-        print >>sys.stderr, 'You pressed Ctrl+C!'
+        print('You pressed Ctrl+C!', file=sys.stderr)
         decoder.stop()
         running = False
         sys.exit(0)

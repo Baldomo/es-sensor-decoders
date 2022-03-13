@@ -1,5 +1,5 @@
 import numpy as np
-from collections import Sequence
+from collections.abc import Sequence
 
 class RingBuffer(Sequence):
     def __init__(self, capacity, dtype="complex64", allow_overwrite=True):

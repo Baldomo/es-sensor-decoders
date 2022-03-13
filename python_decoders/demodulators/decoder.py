@@ -19,7 +19,7 @@ class Decoder(object):
         self.buf = ringbuf.RingBuffer(capacity=buf_size)
         self._setup()
         if self.Fs != self.Fs_in:
-            print >>sys.stderr, "Resampling from %d to %d" % (self.Fs_in, self.Fs)
+            print("Resampling from %d to %d" % (self.Fs_in, self.Fs), file=sys.stderr)
             self.lpf1 = sig.remez(64, [0, self.Fs, self.Fs + (self.Fs_in / 2 - self.Fs) / 4, self.Fs_in / 2], [1, 0],
                                   Hz=self.Fs_in)
             self.zi1 = sig.lfilter_zi(self.lpf1, 1.0)
@@ -38,7 +38,7 @@ class Decoder(object):
     def run(self):
         while self.running:
             if self.buf.is_full:
-                print >> sys.stderr, "Processing too slow! Buffer is full :-("
+                print("Processing too slow! Buffer is full :-(", file=sys.stderr)
 
             if len(self.buf) > 0:
                 data = self.buf.popn(len(self.buf))
